@@ -19,7 +19,7 @@ import com.example.storyplayer.util.Constants.EXTRA_STORY_GROUP_MODEL
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
-class StoryGroupActivity : AppCompatActivity(), ViewPager.OnPageChangeListener {
+class StoryGroupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityStoryGroupBinding
     private lateinit var storyGroupModel: StoryGroupModel
@@ -49,24 +49,32 @@ class StoryGroupActivity : AppCompatActivity(), ViewPager.OnPageChangeListener {
         binding.viewPagerStories.apply {
             setOnSwipeListener(object : StoryViewPager.OnSwipeListener {
                 override fun onSwipeOutAtStart() {
-                    onBackPressed()
+                    finish()
                 }
 
                 override fun onSwipeOutAtEnd() {
-                    onBackPressed()
+                    finish()
                 }
-
             })
             offscreenPageLimit = 0
             setPageTransformer(false, CubeTransformer())
             adapter = StoryGroupPagerAdapter(supportFragmentManager, storyGroupModel.storyGroups)
             currentItem = position
-            addOnPageChangeListener(this@StoryGroupActivity)
-            post { onPageScrollStateChanged(ViewPager.SCROLL_STATE_IDLE) }
+            this.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+                override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+
+                override fun onPageSelected(position: Int) {}
+
+                override fun onPageScrollStateChanged(state: Int) {
+                    if (state == ViewPager.SCROLL_STATE_DRAGGING) {
+                        EventBus.getDefault().post(StoryEvent(StoryEventType.PAUSE, 0))
+                    } else if (state == ViewPager.SCROLL_STATE_IDLE) {
+                        EventBus.getDefault().post(StoryEvent(StoryEventType.RESUME, 0))
+                    }
+                }
+            })
         }
     }
-
-
 
     @Subscribe
     fun onStoryGroupEvent(event: StoryGroupEvent) {
@@ -74,18 +82,20 @@ class StoryGroupActivity : AppCompatActivity(), ViewPager.OnPageChangeListener {
             StoryGroupEventType.COMPLETE_NEXT -> {
                 val currentItem = binding.viewPagerStories.currentItem
                 if (currentItem + 1 > storyGroupModel.storyGroups.size - 1) {
-                    onBackPressed()
+                    finish()
                     return
                 }
                 binding.viewPagerStories.currentItem = currentItem + 1
+                binding.viewPagerStories.adapter?.notifyDataSetChanged()
             }
             StoryGroupEventType.COMPLETE_PREVIOUS -> {
                 val currentItem = binding.viewPagerStories.currentItem
                 if (currentItem - 1 < 0) {
-                    onBackPressed()
+                    finish()
                     return
                 }
                 binding.viewPagerStories.currentItem = currentItem - 1
+                binding.viewPagerStories.adapter?.notifyDataSetChanged()
             }
         }
     }
@@ -94,28 +104,10 @@ class StoryGroupActivity : AppCompatActivity(), ViewPager.OnPageChangeListener {
     fun onStoryEvent(event: StoryEvent) {
         when (event.type) {
             StoryEventType.CLOSE -> {
-                onBackPressed()
+                finish()
             }
             else -> return
         }
-    }
-
-    override fun onPageScrollStateChanged(state: Int) {
-        when (state) {
-            ViewPager.SCROLL_STATE_IDLE -> {
-                EventBus.getDefault().post(StoryEvent(StoryEventType.RESUME, 0))
-            }
-            ViewPager.SCROLL_STATE_DRAGGING -> {
-                EventBus.getDefault().post(StoryEvent(StoryEventType.PAUSE, 0))
-            }
-        }
-    }
-
-    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-    }
-
-
-    override fun onPageSelected(position: Int) {
     }
 
     override fun onStart() {

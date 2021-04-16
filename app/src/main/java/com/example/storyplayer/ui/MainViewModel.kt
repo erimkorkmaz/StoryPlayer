@@ -24,6 +24,18 @@ class MainViewModel: ViewModel() {
                     )
                 ),
                 StoryGroupModel.StoryGroup(
+                    username = "oracle",
+                    profileImageUrl = "https://static.wikia.nocookie.net/matrix/images/c/c9/The_Oracle.jpg/revision/latest?cb=20130119085243",
+                    stories = arrayListOf(
+                        Story(
+                            "1",
+                            "IMAGE",
+                            "",
+                            "https://media.makeameme.org/created/got-a-question-tuq1vt.jpg"
+                        )
+                    )
+                ),
+                StoryGroupModel.StoryGroup(
                     username = "Mr.Smith",
                     profileImageUrl = "https://upload.wikimedia.org/wikipedia/en/1/1f/Agent_Smith_%28The_Matrix_series_character%29.jpg",
                     stories = arrayListOf(
@@ -113,30 +125,6 @@ class MainViewModel: ViewModel() {
                             "IMAGE",
                             "",
                             "https://static2.srcdn.com/wordpress/wp-content/uploads/2020/04/Trinity-Matrix-Featured-Image-1.jpg"
-                        )
-                    )
-                ),
-                StoryGroupModel.StoryGroup(
-                    username = "oracle",
-                    profileImageUrl = "https://static.wikia.nocookie.net/matrix/images/c/c9/The_Oracle.jpg/revision/latest?cb=20130119085243",
-                    stories = arrayListOf(
-                        Story(
-                            "1",
-                            "IMAGE",
-                            "",
-                            "https://media.makeameme.org/created/got-a-question-tuq1vt.jpg"
-                        )
-                    )
-                ),
-                StoryGroupModel.StoryGroup(
-                    username = "merovingian",
-                    profileImageUrl = "https://giantbomb1.cbsistatic.com/uploads/scale_medium/15/155745/2195839-merovin.jpg",
-                    stories = arrayListOf(
-                        Story(
-                            "1",
-                            "IMAGE",
-                            "",
-                            "https://i.pinimg.com/originals/03/c0/20/03c0201bc0d052c9972fd50f2af53ac9.jpg"
                         )
                     )
                 )

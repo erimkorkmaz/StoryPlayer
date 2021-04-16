@@ -9,11 +9,10 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.storyplayer.R
 import com.example.storyplayer.data.model.StoryGroupModel
-import com.example.storyplayer.data.model.StoryType
 import com.example.storyplayer.databinding.FragmentUserStoriesBinding
 import com.example.storyplayer.event.*
 import com.example.storyplayer.ui.adapter.StoriesAdapter
-import com.example.storyplayer.ui.component.storyprogressview.StoryProgressView
+import com.example.storyplayer.ui.component.StoryProgressView
 import com.example.storyplayer.ui.custom.ScrollDisabledLinearLayoutManager
 import com.example.storyplayer.util.Constants
 import com.example.storyplayer.util.Constants.ARG_POSITION
@@ -60,50 +59,12 @@ class StoryGroupFragment : Fragment() {
         super.onResume()
         EventBus.getDefault().register(this)
         binding.storyProgressView.apply {
-            clear()
-            setSize(storyGroup.stories.size)
-            setDuration(Constants.STORY_DURATION)
-            setCallbacks(object : StoryProgressView.Callbacks {
-                override fun onNext() {
-                    val layoutManager =
-                        (binding.rvStories.layoutManager as ScrollDisabledLinearLayoutManager)
-                    val currentPosition = layoutManager.findFirstCompletelyVisibleItemPosition()
-                    if (currentPosition + 1 > storyGroup.stories.size - 1) {
-                        EventBus.getDefault().post(StoryEvent(StoryEventType.NEXT, currentPosition))
-                        return
-                    }
-                    layoutManager.scrollToPosition(currentPosition + 1)
-                }
-
-                override fun onPrevious() {
-                    val layoutManager =
-                        (binding.rvStories.layoutManager as ScrollDisabledLinearLayoutManager)
-                    val currentPosition = layoutManager.findFirstCompletelyVisibleItemPosition()
-                    if (currentPosition - 1 < 0) {
-                        EventBus.getDefault()
-                            .post(StoryEvent(StoryEventType.PREVIOUS, currentPosition))
-                        return
-                    }
-                    layoutManager.scrollToPosition(currentPosition - 1)
-                }
-
-                override fun onComplete() {
-                    val layoutManager =
-                        (binding.rvStories.layoutManager as ScrollDisabledLinearLayoutManager)
-                    val currentPosition = layoutManager.findFirstCompletelyVisibleItemPosition()
-                    if (currentPosition + 1 > storyGroup.stories.size - 1) {
-                        EventBus.getDefault()
-                            .post(StoryGroupEvent(StoryGroupEventType.COMPLETE_NEXT))
-                        return
-                    }
-                    layoutManager.scrollToPosition(currentPosition + 1)
-                }
-            })
-            play()
+            startProgress(this)
         }
         binding.rvStories.apply {
             layoutManager = ScrollDisabledLinearLayoutManager(context)
             adapter = StoriesAdapter(storyGroup.stories)
+            (adapter as StoriesAdapter).notifyDataSetChanged()
         }
     }
 
@@ -118,6 +79,52 @@ class StoryGroupFragment : Fragment() {
         event.duration.notNull {
             binding.storyProgressView.setDurationForIndex(it, event.position)
         }
+    }
+
+    private fun startProgress(view: StoryProgressView) {
+        view.clear()
+        view.setSize(storyGroup.stories.size)
+        view.setDuration(Constants.STORY_DURATION)
+        view.setCallbacks(object : StoryProgressView.Callbacks {
+            override fun onNext() {
+                val layoutManager =
+                    (binding.rvStories.layoutManager as ScrollDisabledLinearLayoutManager)
+                val currentPosition = layoutManager.findFirstCompletelyVisibleItemPosition()
+                if (currentPosition + 1 > storyGroup.stories.size - 1) {
+                    EventBus.getDefault().post(StoryEvent(StoryEventType.NEXT, currentPosition))
+                    return
+                }
+                layoutManager.scrollToPosition(currentPosition + 1)
+                binding.rvStories.adapter?.notifyDataSetChanged()
+            }
+
+            override fun onPrevious() {
+                val layoutManager =
+                    (binding.rvStories.layoutManager as ScrollDisabledLinearLayoutManager)
+                val currentPosition = layoutManager.findFirstCompletelyVisibleItemPosition()
+                if (currentPosition - 1 < 0) {
+                    EventBus.getDefault()
+                        .post(StoryEvent(StoryEventType.PREVIOUS, currentPosition))
+                    return
+                }
+                layoutManager.scrollToPosition(currentPosition - 1)
+                binding.rvStories.adapter?.notifyDataSetChanged()
+            }
+
+            override fun onComplete() {
+                val layoutManager =
+                    (binding.rvStories.layoutManager as ScrollDisabledLinearLayoutManager)
+                val currentPosition = layoutManager.findFirstCompletelyVisibleItemPosition()
+                if (currentPosition + 1 > storyGroup.stories.size - 1) {
+                    EventBus.getDefault()
+                        .post(StoryGroupEvent(StoryGroupEventType.COMPLETE_NEXT))
+                    return
+                }
+                layoutManager.scrollToPosition(currentPosition + 1)
+                binding.rvStories.adapter?.notifyDataSetChanged()
+            }
+        })
+        view.play()
     }
 
     @Subscribe
@@ -157,6 +164,7 @@ class StoryGroupFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.storyProgressView.clear()
         _binding = null
         EventBus.getDefault().unregister(this)
     }

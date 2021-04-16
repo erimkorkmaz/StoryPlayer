@@ -1,4 +1,4 @@
-package com.example.storyplayer.ui.component.storyprogressview
+package com.example.storyplayer.ui.component
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
@@ -77,8 +77,7 @@ class StoryProgressView : LinearLayout {
         if (isComplete) return
         val currentProgressBar = progressBars[currentIndex]
         currentProgressBar.progress = currentProgressBar.max
-        val currentAnimator = animators[currentIndex]
-        currentAnimator.cancel()
+        animators[currentIndex].cancel()
     }
 
     private fun next() {
@@ -115,7 +114,7 @@ class StoryProgressView : LinearLayout {
         if (0 <= currentIndex - 1) {
             p = progressBars[currentIndex - 1]
             p.progress = 0
-            animators[--currentIndex].start()
+            animators[currentIndex - 1].start()
         } else {
             animators[currentIndex].start()
         }
@@ -170,7 +169,8 @@ class StoryProgressView : LinearLayout {
                 }
 
                 override fun onAnimationCancel(p0: Animator?) {
-                    if (index == progressBars.size - 1 || (isReverse && index == 0)) {
+                    if ((isReverse && (isReverse && index == 0)) || (!isReverse && index == progressBars.size - 1)) {
+                        isReverse = false
                         p0?.removeAllListeners()
                     }
                 }

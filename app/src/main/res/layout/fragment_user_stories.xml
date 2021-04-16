@@ -33,12 +33,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/image_profile"
         app:layout_constraintStart_toEndOf="@+id/image_profile"
         app:layout_constraintTop_toTopOf="@+id/image_profile"
         tools:text="USER NAME" />
 
-    <com.example.storyplayer.ui.component.storyprogressview.StoryProgressView
+    <com.example.storyplayer.ui.component.StoryProgressView
         android:id="@+id/story_progress_view"
         android:layout_width="match_parent"
         android:layout_height="2dp"

@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.storyplayer.R
 import com.example.storyplayer.data.model.Story
@@ -115,7 +116,7 @@ class StoryVideoView : ConstraintLayout {
 
         override fun onSingleTapConfirmed(event: MotionEvent): Boolean {
             if (event.rawX.toInt() <= leftOfScreenPixels) {
-                playerManager.stop()
+                playerManager.release()
                 EventBus.getDefault().post(
                     StoryEvent(
                         StoryEventType.PREVIOUS,
@@ -123,7 +124,7 @@ class StoryVideoView : ConstraintLayout {
                     )
                 )
             } else {
-                playerManager.stop()
+                playerManager.release()
                 EventBus.getDefault().post(
                     StoryEvent(
                         StoryEventType.NEXT,
@@ -147,5 +148,10 @@ class StoryVideoView : ConstraintLayout {
                 )
             }
         }
+    }
+
+    override fun canScrollHorizontally(direction: Int): Boolean {
+        playerManager.pause()
+        return super.canScrollHorizontally(direction)
     }
 }
